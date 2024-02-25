@@ -1,0 +1,4 @@
+Pillow>=6.2.1
+matplotlib
+numpy>=1.26.3
+opencv-python>=4.9.0.80

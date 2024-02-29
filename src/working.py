@@ -59,7 +59,7 @@ def crop_to_boxes(m_tmp_output_dir, m_box_output_dir):
     file_index = 1
 
     for file_name in os.listdir(m_tmp_output_dir):
-        if file_name.endswith(".tiff"):
+        if file_name.endswith(".tif"):
             tiff_path = os.path.join(m_tmp_output_dir, file_name)
             img = Image.open(tiff_path)
             print('Width:', img.width)
@@ -79,10 +79,9 @@ def crop_to_boxes(m_tmp_output_dir, m_box_output_dir):
                 else:
                     upper += even_row_height
 
-                box_output_path = os.path.join(m_box_output_dir, f"{file_index}_{row_index}.tiff")
+                box_output_path = os.path.join(m_box_output_dir, f"line_{file_index}.tif")
                 cropped_img.save(box_output_path)
-
-            file_index += 1
+                file_index += 1
 
 
 if __name__ == "__main__":
@@ -107,7 +106,7 @@ if __name__ == "__main__":
             try:
                 # Input and output paths
                 image_path = os.path.join(input_dir, filename)
-                output_path = os.path.join(tmp_output_dir, os.path.splitext(filename)[0] + '.tiff')
+                output_path = os.path.join(tmp_output_dir, os.path.splitext(filename)[0] + '.tif')
 
                 # Perform image conversion and cropping
                 crop_image(image_path, output_path, top_left, top_right, bottom_left)

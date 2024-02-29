@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageChops, ImageEnhance
 
 
 def create_directories(*directories):
@@ -25,6 +25,18 @@ box_output_dir = "../boxed/"
 create_directories(tmp_output_dir, box_output_dir)
 
 
+def trim(im):
+    bg = Image.new(im.mode, im.size, im.getpixel((0, 0)))
+    diff = ImageChops.difference(im, bg)
+    diff = ImageChops.add(diff, diff)
+    # Bounding box given as a 4-tuple defining the left, upper, right, and lower pixel coordinates.
+    # If the image is completely empty, this method returns None.
+    bbox = diff.getbbox()
+    print(bbox)
+    if bbox:
+        return im.crop(bbox)
+
+
 def crop_image(m_image_path, m_output_path, m_top_left, m_top_right, m_bottom_left):
     """
     Crop the input image, convert it to grayscale, threshold it, and save the result as a TIFF image.
@@ -45,8 +57,11 @@ def crop_image(m_image_path, m_output_path, m_top_left, m_top_right, m_bottom_le
     # Convert the cropped image to Grayscale
     bw_image = cropped_img.convert("L")
 
+    # Sharpening the image
+    sharpen = ImageEnhance.Sharpness(bw_image).enhance(2.0)
+
     # Threshold the grayscale image to create a binary image
-    binary_img = bw_image.point(lambda px: 0 if px < 128 else 255, '1')
+    binary_img = sharpen.point(lambda px: 0 if px < 150 else 255, '1')
 
     # Save the binary image as a TIFF file
     print('Saving cropped image into:', m_output_path)
@@ -80,7 +95,9 @@ def crop_to_boxes(m_tmp_output_dir, m_box_output_dir):
                     upper += even_row_height
 
                 box_output_path = os.path.join(m_box_output_dir, f"line_{file_index}.tif")
-                cropped_img.save(box_output_path)
+                print('Saving: ', box_output_path)
+                trimmed_img = trim(cropped_img)
+                trimmed_img.save(box_output_path)
                 file_index += 1
 
 
